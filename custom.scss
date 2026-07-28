@@ -1,0 +1,44 @@
+/*-- scss:defaults --*/
+
+// Slightly smaller root so dense content fits without per-slide tweaks.
+$presentation-font-size-root: 34px;
+$presentation-h2-font-size: 1.4em;
+$code-block-font-size: 0.5em;
+
+/*-- scss:rules --*/
+
+// Tighten vertical rhythm: default reveal spacing is generous and pushes
+// dense slides off the bottom into the footer.
+.reveal .slides section {
+  line-height: 1.2;
+}
+
+.reveal .slides h1,
+.reveal .slides h2,
+.reveal .slides h3 {
+  margin-bottom: 0.4em;
+  line-height: 1.1;
+}
+
+.reveal .slides ul,
+.reveal .slides ol {
+  margin-bottom: 0.3em;
+}
+
+.reveal .slides li {
+  margin-bottom: 0.15em;
+}
+
+.reveal .slides p {
+  margin-bottom: 0.4em;
+}
+
+.reveal .slide aside {
+  font-size: 0.55em;
+  color: #666;
+}
+
+.reveal img {
+  max-height: 60vh;
+  object-fit: contain;
+}

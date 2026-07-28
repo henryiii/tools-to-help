@@ -1,0 +1,13 @@
+# Quarto build output
+/_site/
+/.quarto/
+
+# Stray in-place renders (output now goes to _site/)
+/index.html
+/index_files/
+*_files/
+
+# macOS
+.DS_Store
+
+**/*.quarto_ipynb
