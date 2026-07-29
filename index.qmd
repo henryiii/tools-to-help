@@ -7,6 +7,7 @@ format:
   revealjs:
     slide-number: true
     code-line-numbers: false
+    code-overflow: wrap
     theme: [default, custom.scss]
     footer: >
       [iscinumpy.dev](https://iscinumpy.dev) •
@@ -127,7 +128,6 @@ agent speaking on a user's behalf.
 
 In increasing model difficulty:
 
-::: {.incremental}
 - Ask about the code
 - `/review` a PR
 - Download (gh skill) and try a `/skill`
@@ -141,7 +141,6 @@ In increasing model difficulty:
 - Convert languages or frameworks
 - Prototype new features
 - Review a codebase for bugs, performance, simplifications, modernizations
-:::
 
 ## Stricter the better
 
@@ -151,6 +150,8 @@ Max out static and dynamic testing for best results (in any language)!
 
 ::: aside
 Why is AI better at Rust than C++? There's way more training data for C++
+
+Rust is strict — feeds into the loop!
 :::
 
 ## Language
@@ -162,11 +163,29 @@ you just need to find the matching tool(s)
 
 ## Popularity comparison
 
+::: columns
+::: {.column width="30%"}
+::: {.fragment fragment-index=1}
 But then this happened:
+:::
 
-![](images/star-history-uv.png){height="450"}
-
+::: {.fragment fragment-index=2}
 And then OpenAI bought Astral.
+:::
+:::
+
+::: {.column width="70%"}
+<!-- To finish the two-stage build, add the pre-uv chart (pypa/pip + pypa/pipx,
+     no uv) as images/star-history-pip-pipx.png, put it first in the stack, and
+     move the uv chart to fragment-index=1:
+     ![](images/star-history-pip-pipx.png){.fragment .fade-out fragment-index=1 height="520"}
+     ![](images/star-history-uv.png){.fragment fragment-index=1 height="520"}
+-->
+::: r-stack
+![](images/star-history-uv.png){height="520"}
+:::
+:::
+:::
 
 ## One tool to rule them all {.smaller}
 
@@ -189,7 +208,7 @@ You can use other tools, but they are much slower and you need more tools.
 Partially generated with Copilot
 :::
 
-## Need Python? {.smaller}
+## Need Python?
 
 uv can even install Python for you, anywhere!
 
@@ -210,6 +229,11 @@ $ uv python install graalpy-3.12
 ```
 :::
 :::
+
+- Standalone builds — no system Python and no compiler needed
+- `uv python list` shows what is available
+- `uv run --python 3.9 ...` installs and uses a version for one command
+- Free-threaded, beta, PyPy, and GraalPy builds are all first class
 
 ::: aside
 (native tool replaced: pyenv, sort of)
@@ -456,10 +480,6 @@ How to run • Discussion of checks • (Opinionated) • Mostly focusing on Pyt
 
 - <https://pre-commit.com/hooks.html>
 - Custom hooks are simple
-
-**pre-commit.ci**
-
-- Automatic updates, automatic fixes for PRs
 :::
 
 ::: {.column width="40%"}
@@ -475,6 +495,10 @@ perl, python, python_venv, r, ruby, rust, swift, pygrep, script, system
 **prek**: written in Rust
 
 (both: pipx, nox, homebrew, etc.)
+
+**pre-commit.ci**
+
+- Automatic updates, automatic fixes for PRs
 :::
 :::
 
@@ -527,6 +551,8 @@ Formatter author writes this:
 
 Selected options:
 
+::: columns
+::: {.column width="50%"}
 `files`
 : explicit include regex
 
@@ -535,7 +561,9 @@ Selected options:
 
 `types_or`/`types`/`exclude_types`
 : file types
+:::
 
+::: {.column width="50%"}
 `args`
 : control arguments
 
@@ -544,6 +572,8 @@ Selected options:
 
 `stages`
 : select the git stage (like manual)
+:::
+:::
 
 ## Running prek (pre-commit)
 
@@ -554,6 +584,14 @@ $ prek install
 ```
 
 (Skip with `git commit -n`)
+
+Or run it directly, no hook needed:
+
+```console
+$ prek run -a          # every hook, every file
+$ prek run -a ruff     # just one hook
+$ prek autoupdate      # bump the pinned versions
+```
 
 ## Examples of pre-commit checks
 
@@ -775,7 +813,14 @@ raise RuntimeError(
 )
 ```
 
-Ruff can check for this and rewrite it for you!
+Good:
+
+```python
+msg = f"This was not a valid value for some_value: {some_value!r}"
+raise RuntimeError(msg)
+```
+
+Ruff can check for this and rewrite it for you! (`UP032`, `EM101`)
 
 ## Using code formatters
 
@@ -959,7 +1004,7 @@ from .ghpath import EmptyTraversable
 :::
 :::
 
-## Code UP: pyupgrade {.smaller style="font-size:54%"}
+## Code UP: pyupgrade {.smaller style="font-size:62%"}
 
 ::: columns
 ::: {.column width="33%"}
@@ -1008,22 +1053,20 @@ from .ghpath import EmptyTraversable
 :::
 :::
 
+## pyupgrade examples and limits {.smaller}
+
 | Before | After |
 |---|---|
 | `for a, b in c: yield (a, b)` | `yield from c` |
 | `"{foo} {bar}".format(foo=foo, bar=bar)` | `f"{foo} {bar}"` |
 | `dict([(a, b) for a, b in y])` | `{a: b for a, b in y}` |
 
-## pyupgrade limits
-
 PyUpgrade does not over modernize:
 
 - No match statement conversions (3.10)
 - Nothing converts to using walrus `:=` (3.8) (probably a good thing!)
-
-Except for a bit of typing:
-
-- `Optional[int]` → `int | None` (I like this one now, though)
+- Except for a bit of typing: `Optional[int]` → `int | None`
+  (I like this one now, though)
 
 # Part 2: Other tools
 
@@ -1073,7 +1116,7 @@ extend-select = B9
 :::
 :::
 
-## Custom local flake8 plugin
+## Custom flake8 plugin: the error type
 
 ```python
 import ast
@@ -1088,7 +1131,7 @@ class Flake8ASTErrorInfo(NamedTuple):
     cls: type  # unused
 ```
 
-## Custom local flake8 plugin
+## Custom flake8 plugin: the visitor
 
 ```python
 class Visitor(ast.NodeVisitor):
@@ -1109,7 +1152,7 @@ class Visitor(ast.NodeVisitor):
                 )
 ```
 
-## Custom local flake8 plugin
+## Custom flake8 plugin: the plugin class
 
 ```python
 class AwkwardASTPlugin:
@@ -1125,7 +1168,7 @@ class AwkwardASTPlugin:
         yield from visitor.errors
 ```
 
-## Custom local flake8 plugin
+## Custom flake8 plugin: registering it
 
 ```ini
 [flake8:local-plugins]
@@ -1205,7 +1248,7 @@ For an example of lots of suppressions:
 <!-- The original "Example PyLint rules" slide was a bare title (content was
      images that didn't survive export); add examples here if wanted. -->
 
-## Controversial PyLint rules
+## Controversial PyLint rules {.smaller}
 
 ::: columns
 ::: {.column width="55%"}
@@ -1567,7 +1610,7 @@ Live demo: <https://scientific-python.github.io/repo-review/>
 
 <https://learn.scientific-python.org/development/guides/repo-review/>
 
-![](images/repo-review.png){height="500"}
+![](images/repo-review.png){height="500" fig-align="center"}
 
 # Bonus part: pytest tips
 

@@ -3,7 +3,7 @@
 // Slightly smaller root so dense content fits without per-slide tweaks.
 $presentation-font-size-root: 34px;
 $presentation-h2-font-size: 1.4em;
-$code-block-font-size: 0.5em;
+$code-block-font-size: 0.62em;
 
 /*-- scss:rules --*/
 
@@ -38,7 +38,20 @@ $code-block-font-size: 0.5em;
   color: #666;
 }
 
+// Long repo URLs were clipped at the block edge instead of scrolling into view.
+.reveal .slides pre.sourceCode code.sourceCode {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: hidden;
+}
+
 .reveal img {
-  max-height: 60vh;
+  max-height: 68vh;
   object-fit: contain;
+}
+
+// Images are inline; without this a logo next to text sits on the baseline
+// and pushes the line up.
+.reveal .slides p > img {
+  vertical-align: middle;
 }
