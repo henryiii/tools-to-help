@@ -255,7 +255,7 @@ Examples of applications:
 |---|---|
 | `cibuildwheel`: make redistributable wheels | `rich-cli`: pretty print files |
 | `nox`/`tox`: Python task runners | `cookiecutter`: template packages |
-| `jupylite`: WebAssembly Python site builder | `clang-format`: format C/C++/CUDA code |
+| `jupyterlite`: WebAssembly Python site builder | `clang-format`: format C/C++/CUDA code |
 | `ruff`: Python code quality tooling | `pre-commit`: general CQA tool |
 | `pypi-command-line`: query PyPI | `cmake`: build system generator |
 | `uproot-browser`: ROOT file browser (HEP) | `meson`: another build system generator |
@@ -343,8 +343,8 @@ def tests(session: nox.Session) -> None:
 ```console
 $ nox -s tests-3.14
 nox > Running session tests-3.14
-nox > Creating virtual environment (virtualenv) using python3.14 in .nox/tests-3-14
-nox > python -m pip install '.[test]'
+nox > Creating virtual environment (uv) using python3.14 in .nox/tests-3-14
+nox > uv pip install -e. --group=test
 nox > pytest
 =============================== test session starts ===============================
 platform darwin -- Python 3.14.2, pytest-9.0.1, pluggy-1.0.0
@@ -510,7 +510,7 @@ You write this:
 
 ```yaml
 # .pre-commit-config.yaml
-hooks:
+repos:
 - repo: https://github.com/abravalheri/validate-pyproject
   rev: "0.24.1"
   hooks:
@@ -972,8 +972,9 @@ See all the codes at: <https://docs.astral.sh/ruff/rules>
 - Grouping imports helps readers
 - Can inject future imports
 
-```yaml
-args: ["-a", "from __future__ import annotations"]
+```toml
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
 ```
 
 **Default groupings**
@@ -1073,7 +1074,7 @@ PyUpgrade does not over modernize:
 ## Notebook cleaner
 
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/kynan/nbstripout
   rev: "0.9.1"
   hooks:
@@ -1099,7 +1100,7 @@ hooks:
 
 ::: {.column width="45%"}
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/pycqa/flake8
   rev: "7.3.0"
   hooks:
@@ -1140,7 +1141,7 @@ class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         self.errors: list[Flake8ASTErrorInfo] = []
 
-    def visit_Raise(self, node: ast.Node) -> None:
+    def visit_Raise(self, node: ast.Raise) -> None:
         match node.exc:
             case ast.Call(func=ast.Attribute(attr=attr)) if attr in {"error", "indexerror"}:
                 return
@@ -1303,8 +1304,8 @@ Like a linter on steroids:
 - Configure in pyproject.toml
 
 ```yaml
-hooks:
-- repo: https://gitlab.com/pre-commit/mirrors-mypy
+repos:
+- repo: https://github.com/pre-commit/mirrors-mypy
   rev: "v2.1.0"
   hooks:
     - id: mypy
@@ -1380,7 +1381,7 @@ ignore_missing_imports = true
 ```python
 @typing.runtime_checkable
 class Duck(Protocol):
-    def quack() -> str: ...
+    def quack(self) -> str: ...
 
 
 def f(x: Duck) -> str:
@@ -1388,7 +1389,7 @@ def f(x: Duck) -> str:
 
 
 class MyDuck:
-    def quack() -> str:
+    def quack(self) -> str:
         return "quack"
 
 
@@ -1486,7 +1487,7 @@ def g(x: str | int) -> None:
 ## Clang-format
 
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/pre-commit/mirrors-clang-format
   rev: "v22.1.5"
   hooks:
@@ -1503,7 +1504,7 @@ hooks:
 ## Markdown & YAML with Prettier
 
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/rbubley/mirrors-prettier
   rev: "v3.8.4"
   hooks:
@@ -1520,7 +1521,7 @@ hooks:
 ## ShellCheck
 
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/shellcheck-py/shellcheck-py
   rev: "v0.11.0.1"
   hooks:
@@ -1536,7 +1537,7 @@ hooks:
 ::: columns
 ::: {.column width="50%"}
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/codespell-project/codespell
   rev: "v2.4.2"
   hooks:
@@ -1552,7 +1553,7 @@ hooks:
 
 ::: {.column width="50%"}
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/crate-ci/typos
   rev: "v1.47.2"
   hooks:
@@ -1568,7 +1569,7 @@ Typos is a Rust version, also handles CamelCase/snake_case
 ::: columns
 ::: {.column width="50%"}
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/python-jsonschema/check-jsonschema
   rev: "0.37.3"
   hooks:
@@ -1584,7 +1585,7 @@ hooks:
 
 ::: {.column width="50%"}
 ```yaml
-hooks:
+repos:
 - repo: https://github.com/abravalheri/validate-pyproject
   rev: "0.25"
   hooks:
@@ -1661,7 +1662,7 @@ testpaths = [
 ```python
 @pytest.fixture(params=["Linux", "Darwin", "Windows"], autouse=True)
 def platform_system(request, monkeypatch):
-    monkeypatch.setattr(platform, "system", lambda _: request.param)
+    monkeypatch.setattr(platform, "system", lambda: request.param)
 ```
 
 **Parametrize** — directly or in a fixture for reuse
